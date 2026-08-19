@@ -230,3 +230,42 @@ export const googleCallback = async (
         });
     }
 };
+
+export const myinfo=async ( req: Request,res: Response) => {
+    try {
+        const user=await User.findById(req.user?._id)
+        if(!user){
+            return res.status(403).json({message:"unAuthorized User"})
+        }
+        return user
+    } catch (error) {
+         console.error("myinfo callback error:", error);
+
+        return res.status(500).json({
+            message: "internal server err",
+        });
+    }
+}
+
+export const logout=async ( req: Request,res: Response) => {
+    try {
+        const user=await User.findById(req.user?.userId)
+        if(!user){
+            return res.status(403).json({message:"unAuthorized User"})
+        }
+        res.clearCookie("token",{
+            httpOnly: true,
+            sameSite: "none",
+            secure: true,
+            maxAge: 0
+        })
+            return res.status(200).json({message:"User logout successfully"})
+
+    } catch (error) {
+         console.error("myinfo callback error:", error);
+
+        return res.status(500).json({
+            message: "internal server err",
+        });
+    }
+}

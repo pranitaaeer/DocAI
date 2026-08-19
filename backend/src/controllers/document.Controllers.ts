@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import DocumentModel, { IDocument } from "../models/document.models.js";
+import DocumentModel from "../models/document.models.js";
 
 /**
  * Get all documents belonging to the logged-in user
