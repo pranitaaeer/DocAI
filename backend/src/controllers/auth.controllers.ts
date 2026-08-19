@@ -84,10 +84,10 @@ export const register = async (
 export const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body
-
         if (!email || !password) {
             return res.status(404).json({ message: "all fields are required" })
         }
+
         const user = await User.findOne({ email })
 
         if (!user) {
