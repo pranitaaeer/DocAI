@@ -8,3 +8,14 @@ declare global {
     }
   }
 }
+import { Document } from "mongoose";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: Document | any;
+      file?: Express.Multer.File;
+      files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
+    }
+  }
+}
