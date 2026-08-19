@@ -23,6 +23,9 @@ app.get("/",(req,res)=>{
     res.send("app is working...")
 })
 
+import authRouter from "./routes/auth.route.js"
+
+app.use("authRouter",authRouter)
 app.listen(PORT,()=>{
  console.log(`app is running on : ${PORT}`)
 })
