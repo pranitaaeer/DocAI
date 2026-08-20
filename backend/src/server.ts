@@ -24,8 +24,13 @@ app.get("/",(req,res)=>{
 })
 
 import authRouter from "./routes/auth.route.js"
+import documentRouter from "./routes/document.route.js"
+import chatRouter from "./routes/chat.route.js"
 
 app.use("/auth",authRouter)
+app.use("/doc",documentRouter)
+app.use("/chat",chatRouter)
+
 app.listen(PORT,()=>{
  console.log(`app is running on : ${PORT}`)
 })

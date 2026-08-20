@@ -9,7 +9,7 @@ export const getDocuments = async (
   res: Response
 ) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?._id;
 
     if (!userId) {
       return res.status(401).json({
@@ -49,7 +49,7 @@ export const uploadDocument = async (
   res: Response
 ) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?._id;
 
     if (!userId) {
      return res.status(401).json({
@@ -115,7 +115,7 @@ export const getDocumentById = async (
   res: Response
 ) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?._id;
     const { id } = req.params;
 
     if (!userId) {
@@ -161,7 +161,7 @@ export const deleteDocument = async (
   res: Response
 ) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?._id;
     const { id } = req.params;
 
     if (!userId) {

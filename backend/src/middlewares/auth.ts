@@ -16,7 +16,6 @@ export const auth=async(req:Request,res:Response,next: NextFunction)=>{
         token = authHeader; 
       }
     }
-    console.log("TOKEN:", token)
     if (!token) {
       return res.status(400).json({ msg: "No token in auth !" });
     }
@@ -27,8 +26,6 @@ export const auth=async(req:Request,res:Response,next: NextFunction)=>{
         .json({ msg: "Error while decoding token in auth !" });
     }
      const user = await UserModel.findById(decodedToken.userId)
-        console.log("user",user)
-        console.log("user",decodedToken.userId)
         
      if (!user) {
       return res.status(400).json({ msg: "No user found !" });

@@ -10,7 +10,7 @@ export const createChat = async (
   res: Response
 ) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?._id;
     const { documentId } = req.body;
 
     if (!userId) {
@@ -72,7 +72,7 @@ export const getChats = async (
   res: Response
 ) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?._id;
 
     if (!userId) {
      return res.status(401).json({
@@ -109,7 +109,7 @@ export const getChatById = async (
   res: Response
 ) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?._id;
     const { id } = req.params;
 
     if (!userId) {
@@ -150,7 +150,7 @@ export const sendMessage = async (
   res: Response
 ) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?._id;
     const { id } = req.params;
     const { message } = req.body;
 
@@ -239,7 +239,7 @@ export const deleteChat = async (
   res: Response
 ): Promise<void> => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?._id;
     const { id } = req.params;
 
     if (!userId) {
