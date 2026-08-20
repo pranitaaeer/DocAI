@@ -11,7 +11,7 @@ const groq = new Groq({
   apiKey,
 });
 
-const LLM_MODEL = "llama-3.1-8b-instant";
+const LLM_MODEL = "openai/gpt-oss-20b";
 
 export const generateAnswer = async (
   question: string,
