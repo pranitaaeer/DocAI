@@ -10,6 +10,6 @@ router.post("/logout",auth,logout)
 router.get("/me",auth,myinfo)
 
 router.post("/google",googleLogin)
-router.post("google-callback",googleCallback)
+router.post("/google-callback",googleCallback)
 
 export default router
