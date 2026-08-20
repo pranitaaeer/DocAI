@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import Chat from "../models/chat.models.js";
 import DocumentModel from "../models/document.models.js";
+import { generateQueryEmbedding } from "../services/document/embeddingService.js";
+import { searchDocumentChunks } from "../services/document/chromaService.js";
+import { generateAnswer } from "../services/document/llmService.js";
 
 /**
  * Create a new chat for a document
@@ -14,13 +17,13 @@ export const createChat = async (
     const { documentId } = req.body;
 
     if (!userId) {
-     return res.status(401).json({
+      return res.status(401).json({
         message: "Unauthorized",
       });
     }
 
     if (!documentId) {
-     return res.status(400).json({
+      return res.status(400).json({
         message: "Document ID is required",
       });
     }
@@ -32,14 +35,14 @@ export const createChat = async (
     });
 
     if (!document) {
-     return res.status(404).json({
+      return res.status(404).json({
         message: "Document not found",
       });
     }
 
     // Document should be processed before chatting
     if (document.status !== "ready") {
-     return res.status(400).json({
+      return res.status(400).json({
         message: "Document is not ready for chat",
       });
     }
@@ -50,14 +53,14 @@ export const createChat = async (
       messages: [],
     });
 
-   return res.status(201).json({
+    return res.status(201).json({
       message: "Chat created successfully",
       chat,
     });
   } catch (error) {
     console.error("Create chat error:", error);
 
-   return res.status(500).json({
+    return res.status(500).json({
       message: "Failed to create chat",
     });
   }
@@ -75,7 +78,7 @@ export const getChats = async (
     const userId = req.user?._id;
 
     if (!userId) {
-     return res.status(401).json({
+      return res.status(401).json({
         message: "Unauthorized",
       });
     }
@@ -94,7 +97,7 @@ export const getChats = async (
   } catch (error) {
     console.error("Get chats error:", error);
 
-   return res.status(500).json({
+    return res.status(500).json({
       message: "Failed to fetch chats",
     });
   }
@@ -113,7 +116,7 @@ export const getChatById = async (
     const { id } = req.params;
 
     if (!userId) {
-     return res.status(401).json({
+      return res.status(401).json({
         message: "Unauthorized",
       });
     }
@@ -124,18 +127,18 @@ export const getChatById = async (
     }).populate("documentId", "name originalName");
 
     if (!chat) {
-     return res.status(404).json({
+      return res.status(404).json({
         message: "Chat not found",
       });
     }
 
-   return res.status(200).json({
+    return res.status(200).json({
       chat,
     });
   } catch (error) {
     console.error("Get chat error:", error);
 
-   return res.status(500).json({
+    return res.status(500).json({
       message: "Failed to fetch chat",
     });
   }
@@ -155,7 +158,7 @@ export const sendMessage = async (
     const { message } = req.body;
 
     if (!userId) {
-     return res.status(401).json({
+      return res.status(401).json({
         message: "Unauthorized",
       });
     }
@@ -178,53 +181,71 @@ export const sendMessage = async (
       });
     }
 
-    /*
-     TODO: RAG PIPELINE WILL COME HERE
+    // Get document ID
+    const documentId = chat.documentId.toString();
 
-      1. Convert user question into embedding
+    // 1. Question → embedding
+    const queryEmbedding =
+      await generateQueryEmbedding(
+        message.trim()
+      );
 
-      2. Search Chroma using question embedding
+    // 2. Search relevant chunks in Chroma
+    const results =
+      await searchDocumentChunks(
+        queryEmbedding,
+        documentId,
+        5
+      );
 
-      3. Get relevant document chunks
+    const relevantChunks =
+      results.documents?.[0] ?? [];
 
-      4. Build context from those chunks
+    if (!relevantChunks.length) {
+      return res.status(200).json({
+        message: "No relevant information found",
+        answer:
+          "I could not find relevant information in the uploaded document.",
+      });
+    }
+    
+    const context = relevantChunks.join("\n\n");
 
-      5. Send context + question to Gemini/Groq
+    // 4. Context + question → Groq
+    const aiResponse = await generateAnswer(
+      message.trim(),
+      context
+    );
 
-      6. Get AI response
-
-      7. Save both messages to MongoDB
-    */
-
-    // Temporary response until RAG is connected
-    const aiResponse =
-      "AI response will be generated from the uploaded document.";
-
-    // Save user's message
+    // 5. Save user's message
     chat.messages.push({
       role: "user",
       content: message.trim(),
       createdAt: new Date(),
     });
 
-    // Save AI message
+    // 6. Save AI response
     chat.messages.push({
       role: "assistant",
       content: aiResponse,
       createdAt: new Date(),
     });
 
+    // 7. Save chat
     await chat.save();
 
-   return res.status(200).json({
+    return res.status(200).json({
       message: "Message processed successfully",
       answer: aiResponse,
       chat,
     });
   } catch (error) {
-    console.error("Send message error:", error);
+    console.error(
+      "Send message error:",
+      error
+    );
 
-   return res.status(500).json({
+    return res.status(500).json({
       message: "Failed to process message",
     });
   }
