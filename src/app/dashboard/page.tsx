@@ -134,9 +134,11 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        <button className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/50 transition hover:border-rose-400/20 hover:text-rose-300">
-                            Settings
-                        </button>
+                        <Link href={'/settings'}>
+                            <button className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-white/50 transition hover:border-rose-400/20 hover:text-rose-300">
+                                Settings
+                            </button>
+                        </Link>
                     </header>
 
                     {/* ================= EMPTY STATE ================= */}
