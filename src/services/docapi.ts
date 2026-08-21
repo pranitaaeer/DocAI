@@ -19,6 +19,7 @@ export const uploadDocument = async (file: File) => {
     formData
   );
 
+  
   return response.data;
 };
 
