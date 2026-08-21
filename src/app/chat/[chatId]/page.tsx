@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useAuthStore } from "@/store/authStore";
+import { useEffect, useState } from "react";
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
+  const user = useAuthStore((state) => state.user);
+  const fetchMe = useAuthStore((state) => state.fetchMe);
+
+  useEffect(() => {
+    fetchMe();
+  }, [fetchMe]);
 
   return (
     <main className="min-h-screen bg-[#050505] text-white">
@@ -107,31 +114,38 @@ export default function ChatPage() {
 
           {/* User */}
           <div className="border-t border-white/5 p-4">
-
             <div className="flex items-center gap-3 rounded-xl px-3 py-3 transition hover:bg-white/[0.03]">
 
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-600 text-sm font-semibold">
-                U
-              </div>
+              {/* Avatar */}
+              {user?.avatar ? (
+                <img
+                  src={user.avatar || ""}
+                  alt={user.name || "User"}
+                  className="h-9 w-9 rounded-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-600 text-sm font-semibold">
+                  {user?.name?.charAt(0).toUpperCase() || "U"}
+                </div>
+              )}
 
-              <div className="min-w-0 flex-1">
-
-                <p className="truncate text-sm font-medium">
-                  User
+              {/* User Info */}
+              <div className="flex-1 overflow-hidden">
+                <p className="truncate text-sm font-medium text-white">
+                  {user?.name || "User"}
                 </p>
 
                 <p className="truncate text-[11px] text-white/30">
-                  Personal workspace
+                  {user?.email || "Personal workspace"}
                 </p>
-
               </div>
 
-              <button className="text-white/20 transition hover:text-white/60">
+              <span className="cursor-pointer text-white/20 transition hover:text-white/50">
                 •••
-              </button>
+              </span>
 
             </div>
-
           </div>
 
         </aside>

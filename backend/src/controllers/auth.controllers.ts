@@ -244,7 +244,7 @@ export const googleCallback = async (
 
 export const myinfo=async ( req: Request,res: Response) => {
     try {
-        const user=await User.findById(req.user?._id)
+        const user=await User.findById(req.user?._id).select("-password");
         if(!user){
             return res.status(403).json({message:"unAuthorized User"})
         }
