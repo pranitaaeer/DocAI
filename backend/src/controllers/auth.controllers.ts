@@ -313,6 +313,7 @@ export const changeAvatar = async (req: Request, res: Response) => {
         }
 
         const response=await uploadToCloudinary(avatar as Express.Multer.File)
+        console.log("cloudinary response: ",response)
         if(!response){
             return res.status(400).json({ message: "err to upload avatar" })
         }

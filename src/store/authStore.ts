@@ -7,12 +7,14 @@ import {
     getMyInfo,
     googleLogin as googleLoginApi,
     googleCallback as googleCallbackApi,
+    changePassword,
+    changeAvatar,
 } from "../services/authapi";
 
 import { AuthState } from "../types/store.type"
 
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set,get) => ({
     user: null,
     isAuthenticated: false,
     isLoading: false,
@@ -89,6 +91,27 @@ export const useAuthStore = create<AuthState>((set) => ({
             set({ isLoading: false });
         }
     },
+changePassword: async (passwords) => {
+    try {
+        set({ isLoading: true });
+        const response = await changePassword(passwords);
+        return response;
+    } finally {
+        set({ isLoading: false });
+    }
+},
+
+changeAvatar: async (file) => {
+    try {
+        set({ isLoading: true });
+        const response = await changeAvatar(file);
+        
+        await get().fetchMe(); 
+        return response;
+    } finally {
+        set({ isLoading: false });
+    }
+},
     googleLogin: () => {
         googleLoginApi();
     },

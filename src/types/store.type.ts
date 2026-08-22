@@ -77,6 +77,8 @@ export interface AuthState {
   login: (data: LoginData) => Promise<AuthResponse>;
   logout: () => Promise<{ message: string }>;
   fetchMe: () => Promise<any>;
+  changePassword: (passwords: { currentPassword: string; newPassword: string }) => Promise<{ message: string }>
+  changeAvatar: (file: File) => Promise<{ message: string }>
   googleLogin: () => void;
   googleCallback: (code: string) => Promise<void>;
 }

@@ -40,6 +40,23 @@ export const getMyInfo = async () => {
   return response.data ;
 };
 
+export const changeAvatar = async (file: File) => {
+  const formData = new FormData();
+  formData.append("avatar", file); 
+
+  const response = await api.put("/auth/change-avatar", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+export const changePassword= async (passwords: { currentPassword: string; newPassword: string }) => {
+  const response = await api.put("/auth/change-pass", passwords);
+  return response.data;
+};
+
 export const googleLogin = () => {
   window.location.href =
     `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
