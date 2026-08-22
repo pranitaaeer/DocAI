@@ -60,10 +60,10 @@ export const register = async (
         );
         res.cookie("token", token, {
             httpOnly: true,
-            sameSite: "none",
-            secure: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+            sameSite: "lax",
+            secure: false,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
         return res.status(201).json({
             message: "User registered successfully",
             token,
@@ -116,10 +116,10 @@ export const login = async (req: Request, res: Response) => {
         );
         res.cookie("token", token, {
             httpOnly: true,
-            sameSite: "none",
-            secure: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
+            sameSite: "lax",
+            secure: false,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
 
         return res.status(200).json({
             message: "User login successfully",
@@ -220,10 +220,9 @@ export const googleCallback = async (
         // Save JWT in HTTP-only cookie
         res.cookie("token", token, {
             httpOnly: true,
-            sameSite: "none",
-            secure: true,
-            maxAge:
-                7 * 24 * 60 * 60 * 1000,
+            sameSite: "lax",
+            secure: false,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
         // Redirect to frontend
@@ -264,7 +263,7 @@ export const myinfo = async (req: Request, res: Response) => {
 export const changePassword = async (req: Request, res: Response) => {
     try {
         const { newPassword } = req.body
-        const userId  = req.user?._id
+        const userId = req.user?._id
 
         if (!newPassword) {
             return res.status(404).json({ message: "plz enter password" })
@@ -294,9 +293,9 @@ export const changePassword = async (req: Request, res: Response) => {
 }
 export const changeAvatar = async (req: Request, res: Response) => {
     try {
-        const userId  = req.user?._id
-        const avatar=req.file
-        console.log("avatar:",avatar)
+        const userId = req.user?._id
+        const avatar = req.file
+        console.log("avatar:", avatar)
 
         const user = await User.findById(userId)
         if (!user) {
@@ -306,20 +305,20 @@ export const changeAvatar = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "No avatar file provided" });
         }
 
-        if(user.public_id && avatar){
-            let oldavatar=user.public_id
-           const deleteres= await deleteFromCloudinary(oldavatar as string)
-           console.log("delete avatar:",deleteres)
+        if (user.public_id && avatar) {
+            let oldavatar = user.public_id
+            const deleteres = await deleteFromCloudinary(oldavatar as string)
+            console.log("delete avatar:", deleteres)
         }
 
-        const response=await uploadToCloudinary(avatar as Express.Multer.File)
-        console.log("cloudinary response: ",response)
-        if(!response){
+        const response = await uploadToCloudinary(avatar as Express.Multer.File)
+        console.log("cloudinary response: ", response)
+        if (!response) {
             return res.status(400).json({ message: "err to upload avatar" })
         }
 
-        user.avatar=response.secure_url || user.avatar
-        user.public_id=response.public_id || user.public_id
+        user.avatar = response.secure_url || user.avatar
+        user.public_id = response.public_id || user.public_id
         await user.save()
 
         return res.status(200).json({ message: "update avatar successfully" })

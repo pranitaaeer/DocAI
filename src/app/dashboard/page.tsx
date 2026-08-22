@@ -1,17 +1,65 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
+import { useDocumentStore } from "@/store/documentStore";
+import { useChatStore } from "@/store/chatStore";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
     const [message, setMessage] = useState("");
+    const router = useRouter();
     const user = useAuthStore((state) => state.user);
     const fetchMe = useAuthStore((state) => state.fetchMe);
+    const createNewChat=useChatStore((state)=>state.createNewChat)
+    const {
+        documents,
+        fetchDocuments,
+        isLoading,
+        upload,
+    } = useDocumentStore();
+
+    // File input ref for opening the file picker
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        fetchDocuments();
+    }, [fetchDocuments]);
 
     useEffect(() => {
         fetchMe();
     }, [fetchMe]);
+
+    // File change handler jab user PDF select karega
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+
+            const res = await upload(file);
+            const documentId =  res?._id;
+
+            if (!documentId) {
+                console.error("Document ID not found");
+                return;
+            }
+
+            const newChat = await createNewChat(documentId);
+            const chatId = newChat?._id;
+
+            
+            if (chatId) {
+                router.push(`/chat/${chatId}`);
+            } else {
+                console.error("Chat ID not found");
+            }
+
+        } catch (error) {
+            console.error("Upload or Chat creation failed:", error);
+        }
+    };
 
     return (
         <main className="min-h-screen bg-[#050505] text-white">
@@ -54,23 +102,49 @@ export default function Dashboard() {
                             </p>
 
                             <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-white/30">
-                                0
+                                {documents.length}
                             </span>
                         </div>
 
-                        <div className="rounded-xl border border-dashed border-white/10 px-4 py-6 text-center">
-                            <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-white/30">
-                                ◈
+                        {isLoading ? (
+                            <div className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-6 text-center">
+                                <p className="text-xs text-white/30">
+                                    Loading documents...
+                                </p>
                             </div>
+                        ) : documents.length === 0 ? (
+                            <div className="rounded-xl border border-dashed border-white/10 px-4 py-6 text-center">
+                                <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-white/30">
+                                    ◈
+                                </div>
 
-                            <p className="text-xs text-white/40">
-                                No documents yet
-                            </p>
+                                <p className="text-xs text-white/40">
+                                    No documents yet
+                                </p>
 
-                            <p className="mt-1 text-[10px] text-white/20">
-                                Upload a PDF to get started
-                            </p>
-                        </div>
+                                <p className="mt-1 text-[10px] text-white/20">
+                                    Upload a PDF to get started
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {documents.map((document) => (
+                                    <Link
+                                        key={document._id}
+                                        href={`/dashboard/documents/${document._id}`}
+                                        className="block rounded-xl border border-white/5 bg-white/[0.02] p-3 transition hover:border-rose-400/20 hover:bg-rose-500/[0.03]"
+                                    >
+                                        <p className="truncate text-xs text-white/70">
+                                            {document.name}
+                                        </p>
+
+                                        <p className="mt-1 text-[10px] text-white/25">
+                                            {document.status}
+                                        </p>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Bottom */}
@@ -166,6 +240,15 @@ export default function Dashboard() {
                             Ask questions, find information and get intelligent answers.
                         </p>
 
+                        {/* Hidden File Input */}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept="application/pdf"
+                            className="hidden"
+                        />
+
                         {/* Upload Card */}
                         <div className="group relative mt-9 w-full max-w-[520px]">
 
@@ -187,7 +270,10 @@ export default function Dashboard() {
                                     Drag & drop your document here or browse from your device
                                 </p>
 
-                                <button className="mt-6 rounded-xl bg-rose-500 px-6 py-3 text-sm font-medium text-white shadow-[0_0_25px_rgba(244,63,94,0.18)] transition hover:bg-rose-400 hover:shadow-[0_0_35px_rgba(244,63,94,0.28)]">
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="mt-6 rounded-xl bg-rose-500 px-6 py-3 text-sm font-medium text-white shadow-[0_0_25px_rgba(244,63,94,0.18)] transition hover:bg-rose-400 hover:shadow-[0_0_35px_rgba(244,63,94,0.28)]"
+                                >
                                     Choose PDF
                                 </button>
 
@@ -236,4 +322,3 @@ export default function Dashboard() {
         </main>
     );
 }
-

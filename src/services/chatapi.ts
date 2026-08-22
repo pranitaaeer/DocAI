@@ -5,7 +5,7 @@ import api from "./api";
 export const createChat = async (
   documentId: string
 ) => {
-  const response = await api.post("/chats", {
+  const response = await api.post("/chat/create", {
     documentId,
   });
 
@@ -14,7 +14,7 @@ export const createChat = async (
 
 // Get all chats
 export const getChats = async () => {
-  const response = await api.get("/chats");
+  const response = await api.get("/chat/getchats");
 
   return response.data;
 };
@@ -24,7 +24,7 @@ export const getChatById = async (
   id: string
 ) => {
   const response = await api.get(
-    `/chats/${id}`
+    `/chat/get-chat/${id}`
   );
 
   return response.data;
@@ -36,7 +36,7 @@ export const sendMessage = async (
   message: string
 ) => {
   const response = await api.post(
-    `/chats/${chatId}/message`,
+    `/chat/send-msg/${chatId}`,
     {
       message,
     }
@@ -50,7 +50,7 @@ export const deleteChat = async (
   id: string
 ) => {
   const response = await api.delete(
-    `/chats/${id}`
+    `/chat/delete/${id}`
   );
 
   return response.data;
