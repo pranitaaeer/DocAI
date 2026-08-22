@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.models.js";
@@ -6,6 +6,7 @@ import {
     getGoogleAuthUrl,
     getGoogleUser,
 } from "../services/auth/googleAuthService.js";
+import { deleteFromCloudinary, uploadToCloudinary } from "../services/auth/cloudinary.js";
 
 export const register = async (
     req: Request,
@@ -263,7 +264,7 @@ export const myinfo = async (req: Request, res: Response) => {
 export const changePassword = async (req: Request, res: Response) => {
     try {
         const { newPassword } = req.body
-        const { userId } = req.user?._id
+        const userId  = req.user?._id
 
         if (!newPassword) {
             return res.status(404).json({ message: "plz enter password" })
@@ -293,7 +294,7 @@ export const changePassword = async (req: Request, res: Response) => {
 }
 export const changeAvatar = async (req: Request, res: Response) => {
     try {
-        const { userId } = req.user?._id
+        const userId  = req.user?._id
         const avatar=req.file
         console.log("avatar:",avatar)
 
@@ -301,14 +302,29 @@ export const changeAvatar = async (req: Request, res: Response) => {
         if (!user) {
             return res.status(404).json({ message: "user not found" })
         }
+        if (!avatar) {
+            return res.status(400).json({ message: "No avatar file provided" });
+        }
 
-        
+        if(user.public_id && avatar){
+            let oldavatar=user.public_id
+           const deleteres= await deleteFromCloudinary(oldavatar as string)
+           console.log("delete avatar:",deleteres)
+        }
+
+        const response=await uploadToCloudinary(avatar as Express.Multer.File)
+        if(!response){
+            return res.status(400).json({ message: "err to upload avatar" })
+        }
+
+        user.avatar=response.secure_url || user.avatar
+        user.public_id=response.public_id || user.public_id
         await user.save()
 
-        return res.status(200).json({ message: "update password successfully" })
+        return res.status(200).json({ message: "update avatar successfully" })
 
     } catch (error) {
-        console.error("err in change password:", error);
+        console.error("err in change avatar:", error);
 
         return res.status(500).json({
             message: "internal server err",

@@ -6,6 +6,7 @@ export interface IUser extends Document {
   password: string;
   googleId?: string;
   avatar?: string;
+  public_id?:string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +39,9 @@ const userSchema = new Schema<IUser>({
   avatar: {
     type: String,
   },
+  public_id:{
+    type: String,
+  }
 
 }, { timestamps: true })
 
