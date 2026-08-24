@@ -12,7 +12,10 @@ export default function Dashboard() {
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
     const fetchMe = useAuthStore((state) => state.fetchMe);
-    const createNewChat=useChatStore((state)=>state.createNewChat)
+    
+    // Chat store se createNewChat, chats, aur fetchChats nikal liye hain
+    const { createNewChat, chats, fetchChats } = useChatStore();
+
     const {
         documents,
         fetchDocuments,
@@ -25,7 +28,8 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetchDocuments();
-    }, [fetchDocuments]);
+        fetchChats(); // Chats fetch karna zaroori hai taaki existing chat check ho sake
+    }, [fetchDocuments, fetchChats]);
 
     useEffect(() => {
         fetchMe();
@@ -37,9 +41,8 @@ export default function Dashboard() {
         if (!file) return;
 
         try {
-
             const res = await upload(file);
-            const documentId =  res?._id;
+            const documentId = res?._id;
 
             if (!documentId) {
                 console.error("Document ID not found");
@@ -49,7 +52,6 @@ export default function Dashboard() {
             const newChat = await createNewChat(documentId);
             const chatId = newChat?._id;
 
-            
             if (chatId) {
                 router.push(`/chat/${chatId}`);
             } else {
@@ -58,6 +60,31 @@ export default function Dashboard() {
 
         } catch (error) {
             console.error("Upload or Chat creation failed:", error);
+        }
+    };
+
+    const handleDocumentClick = async (documentId: string) => {
+        try {
+            // Check karein kya is document ki chat pehle se chats array mein maujood hai
+            const existingChat = chats.find((chat) => {
+                const docId = typeof chat.documentId === "object" && chat.documentId !== null
+                    ? chat.documentId._id
+                    : chat.documentId;
+                return docId === documentId;
+            });
+
+            if (existingChat) {
+                // Agar chat pehle se hai toh wahan navigate karein
+                router.push(`/chat/${existingChat._id}`);
+            } else {
+                // Agar chat nahi hai toh nayi create karein
+                const newChat = await createNewChat(documentId);
+                if (newChat?._id) {
+                    router.push(`/chat/${newChat._id}`);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to open chat for document:", error);
         }
     };
 
@@ -128,20 +155,24 @@ export default function Dashboard() {
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                {documents.map((document) => (
-                                    <Link
-                                        key={document._id}
-                                        href={`/dashboard/documents/${document._id}`}
-                                        className="block rounded-xl border border-white/5 bg-white/[0.02] p-3 transition hover:border-rose-400/20 hover:bg-rose-500/[0.03]"
+                                {documents.map((doc) => (
+                                    <button
+                                        key={doc._id}
+                                        onClick={() => handleDocumentClick(doc._id)}
+                                        className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition hover:bg-white/[0.03]"
                                     >
-                                        <p className="truncate text-xs text-white/70">
-                                            {document.name}
-                                        </p>
-
-                                        <p className="mt-1 text-[10px] text-white/25">
-                                            {document.status}
-                                        </p>
-                                    </Link>
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-500/10 text-sm text-rose-400">
+                                            ◈
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="truncate text-xs font-medium text-white/80">
+                                                {doc.originalName}
+                                            </p>
+                                            <p className="mt-1 text-[10px] text-white/25">
+                                                {(doc.fileSize / (1024 * 1024)).toFixed(1)} MB
+                                            </p>
+                                        </div>
+                                    </button>
                                 ))}
                             </div>
                         )}
