@@ -32,17 +32,51 @@ export default function SettingsPage() {
     }, [user]);
 
     // Avatar Change Handler
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const handleFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+) => {
+    const file = e.target.files?.[0];
 
-        try {
-            await changeAvatar(file);
-            toast?.success("Avatar updated successfully!");
-        } catch (error: any) {
-            toast?.error(error?.response?.data?.message || "Failed to update avatar");
-        }
-    };
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+        toast.error("Only JPG, PNG or WEBP images are allowed.");
+        e.target.value = "";
+        return;
+    }
+
+    // Max 2MB
+    const maxSize = 2 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+        toast.error("Image size must be less than 2MB.");
+        e.target.value = "";
+        return;
+    }
+
+    try {
+        await changeAvatar(file);
+
+        toast.success("Avatar updated successfully!");
+    } catch (error: any) {
+        console.error("Avatar upload error:", error);
+
+        toast.error(
+            error?.response?.data?.message ||
+            "Failed to update avatar"
+        );
+    } finally {
+        // Same file ko dobara select karne ki permission
+        e.target.value = "";
+    }
+};
 
     // Password Change Handler
     const handlePasswordUpdate = async () => {
@@ -120,63 +154,85 @@ export default function SettingsPage() {
     }
 
     function ProfileSettings() {
-        return (
-            <div>
-                <SectionHeader title="Profile" description="Manage your personal information." />
+    const isLoading = useAuthStore((state) => state.isLoading);
 
-                {/* Hidden File Input for Avatar */}
-                <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    onChange={handleFileChange} 
-                    accept="image/png, image/jpeg, image/webp" 
-                    className="hidden" 
-                />
+    return (
+        <div>
+            <SectionHeader
+                title="Profile"
+                description="Manage your personal information."
+            />
 
-                {/* Avatar */}
-                <div className="mb-8 flex items-center gap-5">
-                    {user?.avatar ? (
-                        <img src={user.avatar} alt={user.name || "User"} className="h-12 w-12 rounded-full object-cover" referrerPolicy="no-referrer" />
-                    ) : (
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-600 text-sm font-semibold">
-                            {user?.name?.charAt(0).toUpperCase() || "U"}
-                        </div>
-                    )}
+            {/* Hidden File Input */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+            />
 
-                    <div>
-                        <button 
-                            onClick={() => fileInputRef.current?.click()}
-                            className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-xs text-white/60 transition hover:border-rose-400/30 hover:text-rose-400"
-                        >
-                            Change avatar
-                        </button>
-                        <p className="mt-2 text-[11px] text-white/20">JPG, PNG or WEBP. Max 2MB.</p>
+            {/* Avatar */}
+            <div className="mb-8 flex items-center gap-5">
+                {user?.avatar ? (
+                    <img
+                        src={user.avatar}
+                        alt={user.name || "User"}
+                        className="h-16 w-16 rounded-full object-cover border border-white/10"
+                        referrerPolicy="no-referrer"
+                    />
+                ) : (
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-600 text-lg font-semibold">
+                        {user?.name?.charAt(0).toUpperCase() || "U"}
                     </div>
-                </div>
+                )}
 
-                <div className="grid gap-5 sm:grid-cols-2">
-                    <div>
-                        <label className="mb-2 block text-xs font-medium text-white/50">Full name</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-rose-400/40"
-                        />
-                    </div>
-                    <div>
-                        <label className="mb-2 block text-xs font-medium text-white/50">Email address</label>
-                        <input
-                            type="text"
-                            value={user?.email || ""}
-                            disabled
-                            className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none opacity-40 cursor-not-allowed"
-                        />
-                    </div>
+                <div>
+                    <button
+                        type="button"
+                        disabled={isLoading}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-xs text-white/60 transition hover:border-rose-400/30 hover:text-rose-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        {isLoading ? "Uploading..." : "Change avatar"}
+                    </button>
+
+                    <p className="mt-2 text-[11px] text-white/20">
+                        JPG, PNG or WEBP. Max 2MB.
+                    </p>
                 </div>
             </div>
-        );
-    }
+
+            <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                    <label className="mb-2 block text-xs font-medium text-white/50">
+                        Full name
+                    </label>
+
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-rose-400/40"
+                    />
+                </div>
+
+                <div>
+                    <label className="mb-2 block text-xs font-medium text-white/50">
+                        Email address
+                    </label>
+
+                    <input
+                        type="text"
+                        value={user?.email || ""}
+                        disabled
+                        className="w-full cursor-not-allowed rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none opacity-40"
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
 
     function SecuritySettings() {
         return (

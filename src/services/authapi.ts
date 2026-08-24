@@ -42,15 +42,17 @@ export const getMyInfo = async () => {
 
 export const changeAvatar = async (file: File) => {
   const formData = new FormData();
-  formData.append("avatar", file); 
 
-  const response = await api.put("/auth/change-avatar", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  formData.append("avatar", file);
+
+  const response = await api.put(
+    "/auth/change-avatar",
+    formData
+  );
+
   return response.data;
-};
+}
+
 
 export const changePassword= async (passwords: { currentPassword: string; newPassword: string }) => {
   const response = await api.put("/auth/change-pass", passwords);

@@ -3,7 +3,6 @@ import dotenv from "dotenv"
 import cors from "cors"
 import cookieparser from "cookie-parser"
 import DBConnect from "./config/db.js"
-
 dotenv.config()
  await DBConnect()
 

@@ -6,8 +6,7 @@ import {
     getGoogleAuthUrl,
     getGoogleUser,
 } from "../services/auth/googleAuthService.js";
-import { deleteFromCloudinary, uploadToCloudinary } from "../services/auth/cloudinary.js";
-
+import { deleteFromUploadThing, uploadToUploadThing } from "../config/uploadthing.js";
 export const register = async (
     req: Request,
     res: Response
@@ -293,44 +292,69 @@ export const changePassword = async (req: Request, res: Response) => {
 }
 export const changeAvatar = async (req: Request, res: Response) => {
     try {
-        const userId = req.user?._id
-        const avatar = req.file
-        console.log("avatar:", avatar)
+        const userId = req.user?._id;
+        const avatar = req.file;
 
-        const user = await User.findById(userId)
-        if (!user) {
-            return res.status(404).json({ message: "user not found" })
+        if (!userId) {
+            return res.status(401).json({
+                message: "Unauthorized",
+            });
         }
+
         if (!avatar) {
-            return res.status(400).json({ message: "No avatar file provided" });
+            return res.status(400).json({
+                message: "No avatar file provided",
+            });
         }
 
-        if (user.public_id && avatar) {
-            let oldavatar = user.public_id
-            const deleteres = await deleteFromCloudinary(oldavatar as string)
-            console.log("delete avatar:", deleteres)
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+            });
         }
 
-        const response = await uploadToCloudinary(avatar as Express.Multer.File)
-        console.log("cloudinary response: ", response)
+        const oldFileKey = user.public_id;
+
+        // Upload new avatar
+        const response = await uploadToUploadThing(avatar);
+
         if (!response) {
-            return res.status(400).json({ message: "err to upload avatar" })
+            return res.status(400).json({
+                message: "Error uploading avatar",
+            });
         }
 
-        user.avatar = response.secure_url || user.avatar
-        user.public_id = response.public_id || user.public_id
-        await user.save()
+        // Save new avatar
+        user.avatar = response.data.ufsUrl;
+        user.public_id = response.data.key;
 
-        return res.status(200).json({ message: "update avatar successfully" })
+        await user.save();
+
+        // Delete old avatar
+        if (oldFileKey) {
+            try {
+                await deleteFromUploadThing(oldFileKey);
+            } catch (error) {
+                console.error("Old avatar deletion failed:", error);
+            }
+        }
+
+        return res.status(200).json({
+            message: "Avatar updated successfully",
+            avatar: user.avatar,
+            public_id: user.public_id,
+        });
 
     } catch (error) {
-        console.error("err in change avatar:", error);
+        console.error("Error in change avatar:", error);
 
         return res.status(500).json({
-            message: "internal server err",
+            message: "Internal server error",
         });
     }
-}
+};
 export const logout = async (req: Request, res: Response) => {
     try {
         const user = await User.findById(req.user?.userId)
