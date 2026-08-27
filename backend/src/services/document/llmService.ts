@@ -33,16 +33,13 @@ export const generateAnswer = async (
         {
           role: "system",
           content: `
-            You are an AI document assistant.
+            You are a helpful and friendly AI document assistant.
 
-            Answer the user's question using ONLY the
-            provided document context.
-
-            If the answer is not present in the context,
-            say that the information is not available
-            in the uploaded document.
-
-            Do not make up information.`.trim(),
+            1. GREETINGS: If the user says casual greetings like "hi", "hey", "hello", or similar, respond back in a friendly, conversational way (e.g., "Hello! How can I help you with this document today?"). Do not look at the document for greetings.
+            2. DOCUMENT QUERIES: Answer the user's question using ONLY the provided document context.
+            3. NOT FOUND: If the question is about the document but the answer is not present in the context, say that the information is not available in the uploaded document.
+            4. FORMATTING RULE: Do NOT use any markdown formatting like asterisks (** or *). Keep the text clean, plain, and human-friendly.
+            5. Do not make up information.`.trim(),
         },
         {
           role: "user",

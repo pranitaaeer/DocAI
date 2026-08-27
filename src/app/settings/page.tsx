@@ -285,18 +285,76 @@ export default function SettingsPage() {
     }
 
     function AppearanceSettings() {
-        return (
-            <div>
-                <SectionHeader title="Appearance" description="Customize how DocuAI looks." />
-                <p className="mb-3 text-xs font-medium text-white/50">Theme</p>
-                <div className="grid gap-4 sm:grid-cols-3">
-                    <ThemeCard title="Dark" active />
-                    <ThemeCard title="System" />
-                    <ThemeCard title="Light" />
-                </div>
+    return (
+        <div className="max-w-3xl p-6 text-white">
+            <h2 className="text-lg font-semibold mb-1">Appearance</h2>
+            <p className="mb-6 text-xs text-white/50">Customize how DocuAI looks.</p>
+            
+            <p className="mb-3 text-xs font-medium text-white/50">Theme</p>
+            <div className="grid gap-4 sm:grid-cols-3">
+                <ThemeCard title="Dark" active />
+                <ThemeCard title="System" />
+                <ThemeCard title="Light" />
             </div>
-        );
-    }
+        </div>
+    );
+}
+
+function ThemeCard({ title, active }: { title: string; active?: boolean }) {
+    return (
+        <div
+            className={`cursor-pointer rounded-2xl border p-4 transition ${
+                active
+                    ? "border-rose-500 bg-rose-500/5 shadow-lg shadow-rose-500/10"
+                    : "border-white/10 bg-[#080808] hover:border-white/20"
+            }`}
+        >
+            {/* Mini UI Preview Box representing the theme */}
+            <div className="mb-3 h-24 w-full rounded-xl overflow-hidden border border-white/10 p-2 flex flex-col gap-2">
+                {title === "Dark" && (
+                    <div className="h-full w-full bg-[#050505] rounded-lg p-2.5 flex flex-col gap-2 border border-white/5">
+                        <div className="w-1/2 h-2 bg-white/20 rounded-full"></div>
+                        <div className="w-3/4 h-2 bg-white/10 rounded-full"></div>
+                        <div className="mt-auto flex gap-1.5 items-center">
+                            <div className="w-3.5 h-3.5 rounded-full bg-rose-500/40"></div>
+                            <div className="w-10 h-2 bg-white/10 rounded-full"></div>
+                        </div>
+                    </div>
+                )}
+                {title === "Light" && (
+                    <div className="h-full w-full bg-gray-100 rounded-lg p-2.5 flex flex-col gap-2 border border-gray-300">
+                        <div className="w-1/2 h-2 bg-gray-400 rounded-full"></div>
+                        <div className="w-3/4 h-2 bg-gray-300 rounded-full"></div>
+                        <div className="mt-auto flex gap-1.5 items-center">
+                            <div className="w-3.5 h-3.5 rounded-full bg-rose-500"></div>
+                            <div className="w-10 h-2 bg-gray-300 rounded-full"></div>
+                        </div>
+                    </div>
+                )}
+                {title === "System" && (
+                    <div className="h-full w-full bg-gradient-to-r from-[#050505] to-gray-200 rounded-lg p-2.5 flex flex-col gap-2 border border-white/10">
+                        <div className="w-1/2 h-2 bg-white/40 rounded-full"></div>
+                        <div className="w-3/4 h-2 bg-gray-400 rounded-full"></div>
+                        <div className="mt-auto flex gap-1.5 items-center">
+                            <div className="w-3.5 h-3.5 rounded-full bg-rose-500/70"></div>
+                            <div className="w-10 h-2 bg-gray-400 rounded-full"></div>
+                        </div>
+                    </div>
+                )}
+            </div>
+            
+            {/* Title and Active check */}
+            <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-white">{title}</span>
+                {active && (
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] text-white">
+                        ✓
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+}
 
     function AISettings() {
         return (
@@ -339,12 +397,5 @@ export default function SettingsPage() {
         );
     }
 
-    function ThemeCard({ title, active = false }: { title: string; active?: boolean }) {
-        return (
-            <button className={`rounded-xl border p-4 text-left transition ${active ? "border-rose-400/40 bg-rose-500/10 shadow-[0_0_25px_rgba(244,63,94,0.08)]" : "border-white/10 bg-white/[0.02] hover:border-white/20"}`}>
-                <div className="mb-3 h-20 rounded-lg border border-white/10 bg-[#050505]" />
-                <p className="text-xs font-medium">{title}</p>
-            </button>
-        );
-    }
+    
 }
