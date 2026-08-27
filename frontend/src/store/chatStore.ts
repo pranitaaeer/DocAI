@@ -7,7 +7,7 @@ import {
   sendMessage,
   deleteChat,
 } from "../services/chatapi";
-import {ChatState,ChatMessage} from "../types/store.type"
+import { ChatState, ChatMessage } from "../types/store.type"
 
 
 
@@ -175,7 +175,7 @@ export const useChatStore =
           chats: state.chats.map(
             (chat) =>
               chat._id ===
-              updatedChat._id
+                updatedChat._id
                 ? updatedChat
                 : chat
           ),
@@ -201,7 +201,7 @@ export const useChatStore =
           error: null,
         });
 
-       const response = await deleteChat(id);
+        const response = await deleteChat(id);
 
         set((state) => ({
           chats:

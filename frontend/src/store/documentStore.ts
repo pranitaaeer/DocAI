@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import {DocumentState } from "../types/store.type";
+import { DocumentState } from "../types/store.type";
 import {
   getDocuments,
   uploadDocument,
@@ -7,7 +7,7 @@ import {
   deleteDocument,
 } from "../services/docapi";
 
- 
+
 
 export const useDocumentStore =
   create<DocumentState>((set) => ({
@@ -122,7 +122,7 @@ export const useDocumentStore =
           error: null,
         });
 
-       const response= await deleteDocument(id);
+        const response = await deleteDocument(id);
 
         set((state) => ({
           documents:
