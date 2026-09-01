@@ -59,8 +59,8 @@ export const register = async (
         );
         res.cookie("token", token, {
             httpOnly: true,
-            sameSite: "lax",
-            secure: false,
+            secure: true,
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         return res.status(201).json({
@@ -115,8 +115,8 @@ export const login = async (req: Request, res: Response) => {
         );
         res.cookie("token", token, {
             httpOnly: true,
-            sameSite: "lax",
-            secure: false,
+            secure: true,
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -219,8 +219,8 @@ export const googleCallback = async (
         // Save JWT in HTTP-only cookie
         res.cookie("token", token, {
             httpOnly: true,
-            sameSite: "lax",
-            secure: false,
+            secure: true,
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
