@@ -13,7 +13,7 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(cookieparser())
 app.use(cors({
-    origin:"http://localhost:3000",
+    origin:"https://docai-t7rl.onrender.com/auth",
     credentials:true
 }))
 
