@@ -4,6 +4,9 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const { pathname } = req.nextUrl;
 
+  console.log("Middleware pathname:", pathname);
+  console.log("Middleware token exists:", !!token);
+  
   // Protected routes
   const isProtectedRoute =
     pathname.startsWith("/dashboard");
