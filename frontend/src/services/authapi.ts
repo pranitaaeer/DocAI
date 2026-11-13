@@ -83,10 +83,10 @@ export const googleLogin = () => {
     `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
 };
 
-export const googleCallback = async (code: string) => {
-  const response = await api.get(
-    `/auth/google-callback?code=${encodeURIComponent(code)}`
-  );
+// export const googleCallback = async (code: string) => {
+//   const response = await api.get(
+//     `/auth/google-callback?code=${encodeURIComponent(code)}`
+//   );
 
-  return response.data;
-};
+//   return response.data;
+// };
