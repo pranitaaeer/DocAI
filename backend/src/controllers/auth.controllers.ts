@@ -2,11 +2,18 @@ import { Request, response, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.models.js";
+import crypto from "crypto";
 import {
     getGoogleAuthUrl,
     getGoogleUser,
 } from "../services/auth/googleAuthService.js";
 import { deleteFromUploadThing, uploadToUploadThing } from "../config/uploadthing.js";
+
+const pendingGoogleAuth = new Map<
+    string,
+    { token: string; expiresAt: number }
+>();
+
 export const register = async (
     req: Request,
     res: Response
@@ -170,15 +177,12 @@ export const googleCallback = async (
             });
         }
 
-        // Get Google user
         const googleUser = await getGoogleUser(code);
 
-        // Find existing user
         let user = await User.findOne({
             email: googleUser.email,
         });
 
-        // Existing user
         if (user) {
             if (!user.googleId) {
                 user.googleId = googleUser.googleId;
@@ -189,10 +193,7 @@ export const googleCallback = async (
             }
 
             await user.save();
-        }
-
-        // New user
-        if (!user) {
+        } else {
             user = await User.create({
                 name: googleUser.name,
                 email: googleUser.email,
@@ -201,48 +202,35 @@ export const googleCallback = async (
             });
         }
 
-        // JWT secret
         const secret = process.env.JWT_SECRET;
 
         if (!secret) {
-            throw new Error(
-                "JWT_SECRET is not defined"
-            );
+            throw new Error("JWT_SECRET is not defined");
         }
 
-        // Create JWT
         const token = jwt.sign(
-            {
-                userId: user._id,
-            },
+            { userId: user._id },
             secret,
-            {
-                expiresIn: "7d",
-            }
+            { expiresIn: "7d" }
         );
 
-        // Save JWT in HTTP-only cookie
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+        const exchangeCode = crypto.randomBytes(32).toString("hex");
+
+        pendingGoogleAuth.set(exchangeCode, {
+            token,
+            expiresAt: Date.now() + 60 * 1000,
         });
 
-        // Redirect to frontend
         return res.redirect(
-            `${process.env.FRONTEND_URL}/dashboard`
+            `${process.env.FRONTEND_URL}/api/auth/google/callback?code=${exchangeCode}`
         );
 
     } catch (error) {
-        console.error(
-            "Google callback error:",
-            error
-        );
+        console.error("Google callback error:", error);
 
-        return res.status(500).json({
-            message: "Google authentication failed",
-        });
+        return res.redirect(
+            `${process.env.FRONTEND_URL}/login?error=google_auth_failed`
+        );
     }
 };
 
@@ -264,6 +252,46 @@ export const myinfo = async (req: Request, res: Response) => {
         });
     }
 }
+
+export const exchangeGoogleToken = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+        const { code } = req.body;
+
+        if (!code || typeof code !== "string") {
+            return res.status(400).json({
+                message: "Exchange code is required",
+            });
+        }
+
+        const authData = pendingGoogleAuth.get(code);
+
+        if (!authData || authData.expiresAt < Date.now()) {
+            pendingGoogleAuth.delete(code);
+
+            return res.status(401).json({
+                message: "Google login code is invalid or expired",
+            });
+        }
+
+        // One-time use
+        pendingGoogleAuth.delete(code);
+
+        return res.status(200).json({
+            token: authData.token,
+        });
+
+    } catch (error) {
+        console.error("Google token exchange error:", error);
+
+        return res.status(500).json({
+            message: "Google token exchange failed",
+        });
+    }
+};
+
 export const changePassword = async (req: Request, res: Response) => {
     try {
         const { newPassword } = req.body
