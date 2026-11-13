@@ -23,31 +23,34 @@ export default function LoginPage() {
 
   const [error, setError] = useState("");
 
-  const handleSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setError("");
 
-    setError("");
+  if (!email || !password) {
+    setError("Please enter email and password.");
+    return;
+  }
 
-    if (!email || !password) {
-      setError("Please enter email and password.");
-      return;
-    }
+  try {
+    console.log("1. Login started");
 
-    try {
-    const result = await login({
-        email,
-        password,
-      });
-      router.push("/dashboard");
-    } catch (error: any) {
-      setError(
-        error?.response?.data?.message ||
-          "Invalid email or password."
-      );
-    }
-  };
+    const result = await login({ email, password });
+
+    console.log("2. Login successful:", result);
+    console.log("3. Redirecting to dashboard");
+
+    router.push("/dashboard");
+
+  } catch (error: any) {
+    console.error("Login error:", error);
+
+    setError(
+      error?.response?.data?.message ||
+      "Invalid email or password."
+    );
+  }
+};
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#050505] px-4 text-white">
