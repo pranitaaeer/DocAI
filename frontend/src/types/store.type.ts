@@ -80,7 +80,7 @@ export interface AuthState {
   changePassword: (passwords: { currentPassword: string; newPassword: string }) => Promise<{ message: string }>
   changeAvatar: (file: File) => Promise<{ message: string }>
   googleLogin: () => void;
-  googleCallback: (code: string) => Promise<void>;
+  // googleCallback: (code: string) => Promise<void>;
 }
 
 export interface DocumentState {
