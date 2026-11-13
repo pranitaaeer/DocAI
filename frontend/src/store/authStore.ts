@@ -117,12 +117,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     // Handle Google Callback
+    
     googleCallback: async (code) => {
         try {
             set({ isLoading: true });
-
+    
             const response = await googleCallbackApi(code);
-
+    
             set({
                 user: response.user,
                 isAuthenticated: true,
