@@ -6,7 +6,7 @@ import {
     logoutUser,
     getMyInfo,
     googleLogin as googleLoginApi,
-    googleCallback as googleCallbackApi,
+    // googleCallback as googleCallbackApi,
     changePassword,
     changeAvatar,
 } from "../services/authapi";
@@ -118,18 +118,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // Handle Google Callback
     
-    googleCallback: async (code) => {
-        try {
-            set({ isLoading: true });
+    // googleCallback: async (code) => {
+    //     try {
+    //         set({ isLoading: true });
     
-            const response = await googleCallbackApi(code);
+    //         const response = await googleCallbackApi(code);
     
-            set({
-                user: response.user,
-                isAuthenticated: true,
-            });
-        } finally {
-            set({ isLoading: false });
-        }
-    },
+    //         set({
+    //             user: response.user,
+    //             isAuthenticated: true,
+    //         });
+    //     } finally {
+    //         set({ isLoading: false });
+    //     }
+    // },
 }));
