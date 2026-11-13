@@ -40,7 +40,7 @@ export default function LoginPage() {
     console.log("2. Login successful:", result);
     console.log("3. Redirecting to dashboard");
 
-    router.push("/dashboard");
+    router.replace("/dashboard");
 
   } catch (error: any) {
     console.error("Login error:", error);
