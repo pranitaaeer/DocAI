@@ -13,7 +13,7 @@ export default function Dashboard() {
     const user = useAuthStore((state) => state.user);
     const fetchMe = useAuthStore((state) => state.fetchMe);
     const { logout } = useAuthStore();
-    const router = useRouter();
+    
     // Chat store se createNewChat, chats, aur fetchChats nikal liye hain
     const { createNewChat, chats, fetchChats } = useChatStore();
 
