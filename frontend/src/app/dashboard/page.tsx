@@ -226,7 +226,7 @@ export default function Dashboard() {
                                 •••
                               </button>
                             
-                              <div className="absolute bottom-full right-0 mb-2 hidden w-32 rounded-lg border border-white/10 bg-[#1c1c1c] p-1 shadow-lg group-hover:block">
+                              <div className="absolute bottom-full right-0 mb-0 hidden w-32 rounded-lg border border-white/10 bg-[#1c1c1c] p-1 shadow-lg group-hover:block">
                                 <button
                                   onClick={handleLogout}
                                   className="w-full rounded-md px-3 py-2 text-left text-sm text-red-400 transition hover:bg-white/10"
