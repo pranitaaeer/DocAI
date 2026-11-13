@@ -1,5 +1,5 @@
 import express from "express";
-import { googleCallback, googleLogin, register ,login, logout, myinfo, changePassword, changeAvatar} from "../controllers/auth.controllers.js";
+import { googleCallback, googleLogin, register ,login, logout, myinfo, changePassword,exchangeGoogleToken, changeAvatar} from "../controllers/auth.controllers.js";
 import { auth } from "../middlewares/auth.js";
 import { uploadImage } from "../middlewares/multer.js";
 
@@ -15,5 +15,5 @@ router.put("/change-avatar",auth,uploadImage.single("avatar"),changeAvatar)
 
 router.get("/google", googleLogin);
 router.get("/google/callback", googleCallback);
-
+router.post("/google/exchange", exchangeGoogleToken);
 export default router
