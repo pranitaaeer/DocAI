@@ -12,7 +12,8 @@ export default function Dashboard() {
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
     const fetchMe = useAuthStore((state) => state.fetchMe);
-    
+    const { logout } = useAuthStore();
+    const router = useRouter();
     // Chat store se createNewChat, chats, aur fetchChats nikal liye hain
     const { createNewChat, chats, fetchChats } = useChatStore();
 
@@ -23,6 +24,16 @@ export default function Dashboard() {
         upload,
     } = useDocumentStore();
 
+
+
+    const handleLogout = async () => {
+      try {
+        await logout();
+        router.replace("/login");
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+    };
     // File input ref for opening the file picker
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -207,9 +218,23 @@ export default function Dashboard() {
                                 </p>
                             </div>
 
-                            <span className="cursor-pointer text-white/20 transition hover:text-white/50">
+                           <div className="relative group">
+                              <button
+                                className="cursor-pointer text-white/20 transition hover:text-white/70"
+                                title="More options"
+                              >
                                 •••
-                            </span>
+                              </button>
+                            
+                              <div className="absolute bottom-full right-0 mb-2 hidden w-32 rounded-lg border border-white/10 bg-[#1c1c1c] p-1 shadow-lg group-hover:block">
+                                <button
+                                  onClick={handleLogout}
+                                  className="w-full rounded-md px-3 py-2 text-left text-sm text-red-400 transition hover:bg-white/10"
+                                >
+                                  Logout
+                                </button>
+                              </div>
+                            </div>
 
                         </div>
                     </div>
