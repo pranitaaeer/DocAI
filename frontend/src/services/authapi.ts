@@ -5,12 +5,25 @@ import {RegisterData,LoginData} from "../types/store.type"
 export const registerUser = async (
   data: RegisterData
 ) => {
-  const response = await api.post(
-    "/auth/register",
-    data
-  );
+  const response = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
-  return response.data;
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw {
+      response: {
+        data: result,
+      },
+    };
+  }
+
+  return result;
 };
 
 export const loginUser = async (
